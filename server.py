@@ -1,5 +1,5 @@
 import socket
-import threading
+import threading # to run multiple processes at same time
 
 SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -24,14 +24,14 @@ def handle_client(conn, addr, conn_list):
                 conn_list.pop(conn_list.index(conn))
                 break
 
+            print("[RECEIVED] message received")
             print(f"Client[{addr[1]}]  data: ", CLIENT_DATA)
-            MESSAGE = "\tSERVER: [RECEIVED] message received"
-            conn.send(MESSAGE.encode())
 
-            # for i in range(0, len(conn_list)):
-            #     if conn_list[i] != conn:
-            #         MESSAGE = f"\n[{addr[1]}] {CLIENT_DATA}"
-            #         conn_list[i].send(MESSAGE.encode())
+            for i in range(0, len(conn_list)):
+                if conn_list[i] != conn:
+                    print("[SENDING] sending messages ...")
+                    MESSAGE = f"\n[{addr[1]}] {CLIENT_DATA}"
+                    conn_list[i].send(MESSAGE.encode())
                     
     print(f"[CLOSING] closing connection for client[{addr[1]}] ...")
     conn.close()
