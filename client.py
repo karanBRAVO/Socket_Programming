@@ -12,9 +12,9 @@ print("""
 ** type [!DISCONNECT] to exit
 """)
 
-def askFORmsg():  # messaging
+def askFORmsg(name):  # messaging
     while True:
-        msg = input(">> ")
+        msg = input(f"[{name}]: ")
         SOCKET.send(msg.encode())
         if msg == "!DISCONNECT":
             break
@@ -37,8 +37,12 @@ def connectTOserver(addr):  # making connection to the server
     except socket.error:
         print("[!NOT CONNECTING] No host is found")
         sys.exit()
+    
+    client_name = input("Enter your name: ")
+    MESSAGE = client_name + " joined[#123$456&789(0)]"
+    SOCKET.send(MESSAGE.encode())
 
-    thread1 = threading.Thread(target=askFORmsg)
+    thread1 = threading.Thread(target=askFORmsg, args=(client_name,))
     thread1.start()
 
     thread2 = threading.Thread(target=checkMsg)

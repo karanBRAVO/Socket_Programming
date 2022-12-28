@@ -18,20 +18,35 @@ def handle_client(conn, addr, conn_list):
         CLIENT_DATA = (conn.recv(1024)).decode()
 
         if CLIENT_DATA:
+            print("[RECEIVED] message received")
+
+            if CLIENT_DATA.find("joined[#123$456&789(0)]") != -1:
+                if (threading.activeCount() - 1 - 1) == 1:
+                    MESSAGE = f"\n\t[SERVER]: {threading.activeCount() - 1 - 1} user is already here"
+                else:
+                    MESSAGE = f"\n\t[SERVER]: {threading.activeCount() - 1 - 1} users are here"
+                conn.send(MESSAGE.encode())
+                CLIENT_NAME = CLIENT_DATA.removesuffix(" joined[#123$456&789(0)]")
+                CLIENT_DATA = " new user joined"
+
+            print(f"Client[{addr[1]}]  data: ", CLIENT_DATA)
+
+            if len(conn_list) > 1:
+                for i in range(0, len(conn_list)):
+                    if conn_list[i] != conn:
+                        print("[SENDING] sending messages ...")
+                        if CLIENT_DATA == "!DISCONNECT":
+                            MESSAGE = f"\n\t[{addr[1]}] [{CLIENT_NAME}]: left"
+                        else:
+                            MESSAGE = f"\n\t[{addr[1]}] [{CLIENT_NAME}]: {CLIENT_DATA}"
+                        conn_list[i].send(MESSAGE.encode())
+                        print("[SENT] message sent")
+
             if CLIENT_DATA == "!DISCONNECT":
                 MESSAGE = "[DISCONNECTED] disconnected from the server"
                 conn.send(MESSAGE.encode())
                 conn_list.pop(conn_list.index(conn))
                 break
-
-            print("[RECEIVED] message received")
-            print(f"Client[{addr[1]}]  data: ", CLIENT_DATA)
-
-            for i in range(0, len(conn_list)):
-                if conn_list[i] != conn:
-                    print("[SENDING] sending messages ...")
-                    MESSAGE = f"\n[{addr[1]}] {CLIENT_DATA}"
-                    conn_list[i].send(MESSAGE.encode())
                     
     print(f"[CLOSING] closing connection for client[{addr[1]}] ...")
     conn.close()
